@@ -2,16 +2,12 @@ from TicketViewer import TicketViewer
 import getpass
 import math
 from dateutil import parser
-# The driver to use the ticket viewer
-# 1. Displays a friendly error message if the API is unavailable or the response is invalid.
-# 2. Tells the user something is wrong if there is a program error.
 
 
 class commandLineDisplay:
     def __init__(self):
         print("Welcome ot the Zendesk ticket viewer!")
         self.tv = TicketViewer()
-        pass
 
     def start(self):
         '''
@@ -23,22 +19,18 @@ class commandLineDisplay:
             self.username = input("Please provide your login email address: ")
             self.password = getpass.getpass(
                 "Please provide your login password: ")
-            self.ticket_cnt = self.tv.login(
-                self.domain, self.username, self.password)
+            self.ticket_cnt = self.tv.login(self.domain, self.username, self.password)
             print("")
             if self.ticket_cnt == -1:
                 failed_cnt += 1
                 print("Sorry, your provided credentials do not match our records.")
                 if failed_cnt > 2:
-                    print(
-                        "Please sign up first or verify your credentials, then try again.")
+                    print("Please sign up first or verify your credentials, then try again.")
                     exit()
-                print(
-                    "Please try again (failed_times : {0})\n".format(failed_cnt))
+                print("Please try again (failed_times : {0})\n".format(failed_cnt))
             if self.ticket_cnt >= 0:
                 print("Welcome to {0}!".format(self.domain))
-                print("Currently you have {0} tickets.".format(
-                    self.ticket_cnt))
+                print("Currently you have {0} tickets.".format(self.ticket_cnt))
                 break
 
         # now the user has successful login
@@ -62,7 +54,7 @@ class commandLineDisplay:
         '''
         PROMPT = "\nSelect view options:\n\
     * Press 1 to view all tickets\n\
-    * Press 2 to view a particular\n\
+    * Press 2 to view a particular ticket\n\
     * Type 'quit' to exit\n"
         while True:
             cmd = input(PROMPT)
@@ -70,7 +62,7 @@ class commandLineDisplay:
                 self.display_all_tickets()
             elif cmd == '2':
                 while True:
-                    ticket_id = input("Enter ticket number:\n")
+                    ticket_id = input("Enter a valid ticket id:\n")
                     if ticket_id.isdigit():
                         break
                     print('Please input a number')
@@ -96,8 +88,7 @@ class commandLineDisplay:
             total_page = math.ceil(len(all_tickets)/25)
             cur_page = 1
             while cur_page <= total_page:
-                self.display_range_tickets(
-                    all_tickets, start=25*(cur_page-1), end=25*cur_page)
+                self.display_range_tickets(all_tickets, start=25*(cur_page-1), end=25*cur_page)
                 cmd = self.display_page_selection(cur_page, total_page)
                 if cmd == '1':
                     cur_page -= 1
@@ -107,8 +98,7 @@ class commandLineDisplay:
                     break
         else:
             # all tickets can be shown in one page
-            self.display_range_tickets(
-                all_tickets, start=0, end=len(all_tickets))
+            self.display_range_tickets(all_tickets, start=0, end=len(all_tickets))
 
     def display_range_tickets(self, tickets: list, start: int, end: int):
         '''
@@ -177,16 +167,14 @@ class commandLineDisplay:
         '''
         Displaying a signle ticket according to output format
         '''
-        ticket = self.tv.fetch_signle_ticket(
-            self.domain, self.username, self.password, ticket_id)
+        ticket = self.tv.fetch_signle_ticket(self.domain, self.username, self.password, ticket_id)
         if ticket:
             res = self.display_detailed_header()
             res += self.detailed_content_transform(ticket)
             res += "="*120
             print(res)
         else:
-            print("Ticket id {0} does not exit. \
-                Please enter an existing ticket id".format(ticket_id))
+            print("Ticket id {0} does not exit. Please enter an existing ticket id.".format(ticket_id))
 
     def display_detailed_header(self):
         '''
