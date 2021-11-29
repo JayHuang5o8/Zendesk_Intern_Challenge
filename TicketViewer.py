@@ -46,23 +46,28 @@ class TicketViewer:
     # 2. during the fetching process, handle the API unavaliable situation
 
     def fetch_signle_ticket(self, ticket_id: int) -> dict:
-        cmd = "curl https://{0}.zendesk.com/api/v2/tickets/{3}.json -u {1}:{2}".format(
-            self.domain, self.username, self.password, ticket_id)
+        cmd = "curl https://{0}.zendesk.com/api/v2/tickets/{3}.json \
+            -u {1}:{2}".format(self.domain, self.username, self.password, ticket_id)
         res = self.execute_cmd(cmd)
         if 'error' in res:
+            # when ticket id does not exist, api will return error
             return None
-        return res
+        return res.get('ticket')
 
-    def fetch_range_tickets(self, start: int, end: int) -> list:
+    def fetch_range_tickets(self) -> list:
         '''
-        Fetching tickets from start id to end id. 
+        Fetching all tickets from an agent. 
+        According to api document, each curl can only load 100 max 
+        tickets per page, which needs support for more tickets view
         Return:
-            The list of tickets. If error, return empty list
+            The list of tickets. If error, return ('error', error message)
         '''
-        try:
-            # fetching
-            pass
-        except:
-            return []
+        cmd = "curl https://{0}.zendesk.com/api/v2/tickets.json \
+            -u {1}:{2}".format(self.domain, self.username, self.password)
+        res = self.execute_cmd(cmd)
+        if 'error' in res:
+            # when ticket id does not exist, api will return error
+            return ['error', res.get('error')]
+        return res.get('tickets')
 
     # 3. need to display
