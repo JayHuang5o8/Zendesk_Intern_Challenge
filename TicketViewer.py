@@ -8,22 +8,25 @@ class TicketViewer:
 
     def execute_cmd(self, cmd: str):
         '''
-        The function to handle the curl command. In this function, handle exceptions
+        The function to handle the curl command. 
+        When API is not avaliable, return "error"
         Return:
             curl result
         '''
         ret = subprocess.run(cmd, shell=True, capture_output=True)
         # if res.returncode == 0:
-        res = json.loads(ret.stdout)
+        try:
+            # when API is not avaliable, the result is not json format
+            res = json.loads(ret.stdout)
+        except:
+            return 'error'
         return res
 
-    # ready to define other behaviors
-
-    def login(self,  domain, username, password):
+    def login(self, domain: str, username: str, password: str):
         '''
-        post the login info into zendesk api and check return status
+        Post the login info into zendesk api and check return status
         Return:
-            int: the number of tickets it has
+            int: the number of tickets the agent has
             -1: failed
         '''
         # use str() to avoid unsafe input
@@ -35,17 +38,24 @@ class TicketViewer:
 
         res = self.execute_cmd(cmd)
         if 'error' in res:
+            # the provided credentials are not valid or the api is not avaliable
             return -1
         else:
+            # make sure the returned format has 'value' and 'count' key
             if 'count' in res and 'value' in res.get('count'):
                 return res.get('count').get('value')
-            # other wrong
+            # other unknown error sitution, may be the json format is changed
             return -1
 
-    # 1. fetch API to get tickets
-    # 2. during the fetching process, handle the API unavaliable situation
-
     def fetch_signle_ticket(self, ticket_id: int) -> dict:
+        '''
+        Fetch a signle ticket of particular ticket_id from ticket api
+        Args:
+            ticket_id: the ticket id of a particular number
+        Return:
+            the dictionary format of the ticket details;
+            None if the ticket is not avalible 
+        '''
         cmd = "curl https://{0}.zendesk.com/api/v2/tickets/{3}.json \
             -u {1}:{2}".format(self.domain, self.username, self.password, ticket_id)
         res = self.execute_cmd(cmd)
@@ -58,9 +68,10 @@ class TicketViewer:
         '''
         Fetching all tickets from an agent. 
         According to api document, each curl can only load 100 max 
-        tickets per page, which needs support for more tickets view
+        tickets per page, which is a limitation of curl api
         Return:
-            The list of tickets. If error, return ('error', error message)
+            The list of tickets. 
+            If error, return ['error', error message]
         '''
         cmd = "curl https://{0}.zendesk.com/api/v2/tickets.json \
             -u {1}:{2}".format(self.domain, self.username, self.password)
@@ -69,5 +80,3 @@ class TicketViewer:
             # when ticket id does not exist, api will return error
             return ['error', res.get('error')]
         return res.get('tickets')
-
-    # 3. need to display
