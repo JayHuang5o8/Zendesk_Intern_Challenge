@@ -6,6 +6,17 @@ class TicketViewer:
     def __init__(self):
         pass
 
+    def execute_cmd(self, cmd: str):
+        '''
+        The function to handle the curl command. In this function, handle exceptions
+        Return:
+            curl result
+        '''
+        ret = subprocess.run(cmd, shell=True, capture_output=True)
+        # if res.returncode == 0:
+        res = json.loads(ret.stdout)
+        return res
+
     # ready to define other behaviors
 
     def login(self,  domain, username, password):
@@ -21,10 +32,8 @@ class TicketViewer:
         self.password = str(password)
         cmd = "curl https://{0}.zendesk.com/api/v2/tickets/count.json -u {1}:{2}".format(
             domain, username, password)
-        # not deal with error situation
-        ret = subprocess.run(cmd, shell=True, capture_output=True)
-        # if res.returncode == 0:
-        res = json.loads(ret.stdout)
+
+        res = self.execute_cmd(cmd)
         if 'error' in res:
             return -1
         else:
@@ -33,13 +42,20 @@ class TicketViewer:
             # other wrong
             return -1
 
-    # 0. need user to provide workspace domain, username and password
     # 1. fetch API to get tickets
     # 2. during the fetching process, handle the API unavaliable situation
 
-    def fetch(self) -> list:
+    def fetch_signle_ticket(self, ticket_id: int) -> dict:
+        cmd = "curl https://{0}.zendesk.com/api/v2/tickets/{3}.json -u {1}:{2}".format(
+            self.domain, self.username, self.password, ticket_id)
+        res = self.execute_cmd(cmd)
+        if 'error' in res:
+            return None
+        return res
+
+    def fetch_range_tickets(self, start: int, end: int) -> list:
         '''
-        Fetching tickets from ticket API. If API is not avaliable, return empty list
+        Fetching tickets from start id to end id. 
         Return:
             The list of tickets. If error, return empty list
         '''
@@ -50,18 +66,3 @@ class TicketViewer:
             return []
 
     # 3. need to display
-
-    def get_API(self) -> str:
-        '''
-        eturn the ticket API
-        '''
-        pass
-
-    def set_APT(self, api: str) -> int:
-        '''
-        change the ticket api
-        Return:
-            1: success
-            0: failed
-        '''
-        pass
