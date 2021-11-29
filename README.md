@@ -1,5 +1,7 @@
 # The Zendesk Intern Coding Challenge: The Zendesk Ticket Viewer
 
+- author: Shijie Huang
+
 ## Installation
 No installation needed. Make sure your python version is above 3.0
 
