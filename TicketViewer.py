@@ -47,7 +47,7 @@ class TicketViewer:
             # other unknown error sitution, may be the json format is changed
             return -1
 
-    def fetch_signle_ticket(self, ticket_id: int) -> dict:
+    def fetch_signle_ticket(self, domain, username, password, ticket_id: int) -> dict:
         '''
         Fetch a signle ticket of particular ticket_id from ticket api
         Args:
@@ -57,14 +57,14 @@ class TicketViewer:
             None if the ticket is not avalible 
         '''
         cmd = "curl https://{0}.zendesk.com/api/v2/tickets/{3}.json \
-            -u {1}:{2}".format(self.domain, self.username, self.password, ticket_id)
+            -u {1}:{2}".format(domain, username, password, ticket_id)
         res = self.execute_cmd(cmd)
         if 'error' in res:
             # when ticket id does not exist, api will return error
             return None
         return res.get('ticket')
 
-    def fetch_range_tickets(self) -> list:
+    def fetch_range_tickets(self, domain, username, password) -> list:
         '''
         Fetching all tickets from an agent. 
         According to api document, each curl can only load 100 max 
@@ -74,9 +74,9 @@ class TicketViewer:
             If error, return ['error', error message]
         '''
         cmd = "curl https://{0}.zendesk.com/api/v2/tickets.json \
-            -u {1}:{2}".format(self.domain, self.username, self.password)
+            -u {1}:{2}".format(domain, username, password)
         res = self.execute_cmd(cmd)
         if 'error' in res:
-            # when ticket id does not exist, api will return error
+            # when credential is wrong,  api will return error
             return ['error', res.get('error')]
         return res.get('tickets')

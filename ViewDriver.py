@@ -86,7 +86,8 @@ class commandLineDisplay:
         Display all tickets. For each page, only display 25 tickets.
         page */*, page up, page down, menu
         '''
-        all_tickets = self.tv.fetch_range_tickets()
+        all_tickets = self.tv.fetch_range_tickets(
+            self.domain, self.username, self.password)
         if all_tickets[0] == 'error':
             print("Cannot fetch your tickets, error meeage is", all_tickets[1])
             return
@@ -176,7 +177,8 @@ class commandLineDisplay:
         '''
         Displaying a signle ticket according to output format
         '''
-        ticket = self.tv.fetch_signle_ticket(ticket_id)
+        ticket = self.tv.fetch_signle_ticket(
+            self.domain, self.username, self.password, ticket_id)
         if ticket:
             res = self.display_detailed_header()
             res += self.detailed_content_transform(ticket)
